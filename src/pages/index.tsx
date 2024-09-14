@@ -1,115 +1,163 @@
-import Image from "next/image";
-import localFont from "next/font/local";
-
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-});
+import { useState, useEffect, useRef } from 'react';
+import { gsap } from 'gsap';
 
 export default function Home() {
-  return (
-    <div
-      className={`${geistSans.variable} ${geistMono.variable} grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]`}
-    >
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/pages/index.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [showContent, setShowContent] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState('home');
+  const [scrollEnabled, setScrollEnabled] = useState(false);
+  const [showNav, setShowNav] = useState(false); // Track navbar visibility
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+  const containerRef = useRef<HTMLDivElement>(null);
+  const logoRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const logoAnimation = gsap.timeline();
+
+    logoAnimation
+      .to(logoRef.current, {
+        top: '3rem',
+        scale: 0.5,
+        duration: 1.5,
+        ease: 'power2.inOut',
+        onComplete: () => {
+          setTimeout(() => {
+            setShowContent(true); // Show content with delay
+            setScrollEnabled(true);
+          }, 1000); // Delay content loading by 1 second
+        },
+      });
+  }, []);
+
+  useEffect(() => {
+    if (showContent) {
+      // Animate the navbar with a pop-in effect after content shows
+      setTimeout(() => {
+        setShowNav(true);
+      }, 1000); // Delay navbar by another second
+    }
+  }, [showContent]);
+
+  // Scroll interaction logic with debouncing
+  useEffect(() => {
+    const sections = document.querySelectorAll('section');
+    let currentSectionIndex = 0;
+    let scrolling = false;
+
+    const handleScroll = (event: WheelEvent) => {
+      if (!scrolling && sections.length > 0) {
+        scrolling = true;
+        const direction = event.deltaY > 0 ? 'next' : 'prev';
+
+        if (direction === 'next') {
+          currentSectionIndex = Math.min(currentSectionIndex + 1, sections.length - 1);
+        } else {
+          currentSectionIndex = Math.max(currentSectionIndex - 1, 0);
+        }
+
+        const nextSection = sections[currentSectionIndex];
+        nextSection.scrollIntoView({ behavior: 'smooth' });
+
+        setTimeout(() => {
+          scrolling = false;
+        }, 1500); // Debounce to avoid fast multiple scrolls, especially on touchpads
+      }
+    };
+
+    if (scrollEnabled) {
+      containerRef.current?.addEventListener('wheel', handleScroll);
+    }
+
+    return () => {
+      containerRef.current?.removeEventListener('wheel', handleScroll);
+    };
+  }, [scrollEnabled]);
+
+  return (
+    <div ref={containerRef} className="relative h-screen overflow-hidden">
+      {/* Logo Container */}
+      <div
+        ref={logoRef}
+        className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 transition-all w-16 h-16"
+      >
+        <img src="/logo.svg" alt="Company Logo" className="w-full h-full" />
+      </div>
+
+      {showContent && (
+        <>
+          {/* Horizontal Scroll for First 3 Sections */}
+          <div className="flex h-screen snap-x snap-mandatory overflow-x-auto overflow-y-hidden fade-in-content">
+            <section id="home" className="flex-none flex items-center justify-center h-full w-full bg-white snap-start">
+              <h1 className="text-5xl font-Inter text-center font-thin">Streamline Sustainability</h1>
+            </section>
+
+            <section id="about" className="flex-none flex items-center justify-center h-full w-full bg-white snap-start">
+              <h1 className="text-5xl font-Inter text-center font-thin">Need a sentence here that describes <br/> what we do and also sounds cool</h1>
+            </section>
+
+            <section id="services" className="flex-none flex items-center justify-center h-full w-full bg-white snap-start">
+              <h1 className="text-3xl font-Inter font-thin">Our Services Section</h1>
+            </section>
+          </div>
+
+          {/* Vertical Scroll for Next 2 Sections */}
+          <div className="snap-y snap-mandatory h-screen overflow-y-auto overflow-x-hidden fade-in-content">
+            <section id="vertical" className="flex-none flex items-center justify-center h-screen w-full bg-white snap-start">
+              <h1 className="text-3xl font-inter font-thin">Vertical Scroll Section</h1>
+            </section>
+
+            <section id="vertical-2" className="flex-none flex items-center justify-center h-screen w-full bg-white snap-start">
+              <h1 className="text-3xl font-thin">Vertical Section 2</h1>
+            </section>
+          </div>
+
+          {/* Horizontal Scroll for Last Sections */}
+          <div className="flex h-screen snap-x snap-mandatory overflow-x-auto overflow-y-hidden fade-in-content">
+            <section id="horizontal-1" className="flex-none flex items-center justify-center h-full w-full bg-white snap-start">
+              <h1 className="text-3xl font-thin">Horizontal Section 1</h1>
+            </section>
+          
+            <section id="horizontal-2" className="flex-none flex items-center justify-center h-full w-full bg-white snap-start">
+              <h1 className="text-3xl font-thin">Horizontal Section 2</h1>
+            </section>
+          </div>
+
+          {/* Navbar with pop-in animation */}
+          {showNav && (
+            <nav className="fixed text-center bottom-8 left-1/2 transform -translate-x-1/2 bg-black rounded-md px-6 py-2 w-64 scale-up">
+              <button className="text-white" onClick={() => setMenuOpen(!menuOpen)}>
+                {activeSection.charAt(0).toUpperCase() + activeSection.slice(1)}
+              </button>
+              <div
+                className={`${
+                  menuOpen ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'
+                } overflow-hidden absolute bottom-9 left-0 bg-black w-full rounded-md text-white duration-300 ease-in-out`}
+              >
+                <ul className="text-center">
+                  <li className={`py-2 ${activeSection === 'home' ? 'text-yellow-400' : ''}`}>
+                    <a href="#home" onClick={() => setMenuOpen(false)}>Home</a>
+                  </li>
+                  <li className={`py-2 ${activeSection === 'about' ? 'text-yellow-400' : ''}`}>
+                    <a href="#about" onClick={() => setMenuOpen(false)}>About</a>
+                  </li>
+                  <li className={`py-2 ${activeSection === 'services' ? 'text-yellow-400' : ''}`}>
+                    <a href="#services" onClick={() => setMenuOpen(false)}>Services</a>
+                  </li>
+                  <li className={`py-2 ${activeSection === 'vertical' ? 'text-yellow-400' : ''}`}>
+                    <a href="#vertical" onClick={() => setMenuOpen(false)}>Vertical</a>
+                  </li>
+                  <li className={`py-2 ${activeSection === 'horizontal-1' ? 'text-yellow-400' : ''}`}>
+                    <a href="#horizontal-1" onClick={() => setMenuOpen(false)}>Horizontal 1</a>
+                  </li>
+                  <li className={`py-2 ${activeSection === 'horizontal-2' ? 'text-yellow-400' : ''}`}>
+                    <a href="#horizontal-2" onClick={() => setMenuOpen(false)}>Horizontal 2</a>
+                  </li>
+                </ul>
+              </div>
+            </nav>
+          )}
+        </>
+      )}
     </div>
   );
 }

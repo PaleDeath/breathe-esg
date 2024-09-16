@@ -1,3 +1,4 @@
+/* styles/globals.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -59,34 +60,6 @@ html {
 
 .animate-breathe {
   animation: breathe 3s ease-in-out infinite;
-}
-
-/* Fade-in animation for content */
-.fade-in-content {
-  opacity: 0;
-  animation: fadeIn 1.5s forwards;
-  animation-delay: 1s;
-}
-
-@keyframes fadeIn {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
-/* Pop-in effect for the navbar */
-.scale-up {
-  transform: scale(0);
-  animation: scaleUp 0.5s forwards;
-}
-
-@keyframes scaleUp {
-  to {
-    transform: scale(1);
-  }
 }
 
 .opacity-0 {

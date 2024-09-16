@@ -2,9 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 
 export default function Home() {
-  const [showContent, setShowContent] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState('home');
+  const [activeSection] = useState('home');
   const [scrollEnabled, setScrollEnabled] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
